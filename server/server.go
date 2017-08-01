@@ -1,69 +1,85 @@
 package main
 
-import(
-	"io/ioutil"
+import (
 	"fmt"
 	"net/http"
-	"html/template"
+	"os"
+	"encoding/gob"
+	"log"
+
 	"github.com/eimearc/latex"
 )
 
 var page latex.Page
+var filePath string = "/root/go/src/github.com/eimearc/latex.txt"
 
-type Page struct {
-    Title string
-    Body  []byte
+func upload() latex.Page {
+	fmt.Println("Upload file.")
+
+	f, err := os.Open(filePath)
+	defer f.Close()
+	if err != nil {
+		log.Fatal("Error opening file", filePath, err)
+	}
+
+	var result latex.Page
+	enc := gob.NewDecoder(f)
+	err = enc.Decode(&result)
+	if err != nil {
+		log.Fatal("Error decoding page from", f, err)
+	}
+
+	fmt.Println("File has been successfuly gob decoded.")
+	return result
 }
 
-func (p *Page) save() error {
-    filename := p.Title + ".txt"
-    return ioutil.WriteFile(filename, p.Body, 0600)
+func download() {
+	fmt.Println("Download file.")
+
+	f, err := os.Create(filePath)
+	defer f.Close()
+	if err != nil {
+		log.Fatal("Error opening file", filePath, err)
+	}
+
+	enc := gob.NewEncoder(f)
+	err = enc.Encode(page)
+	if err != nil {
+		log.Fatal("Error encoding page", page, err)
+	}
+
+	fmt.Println("File has been successfuly gob encoded.")
 }
 
-func loadPage(title string) (*Page, error) {
-    filename := title + ".txt"
-    body, err := ioutil.ReadFile(filename)
-    if err != nil {
-        return nil, err
-    }
-    return &Page{Title: title, Body: body}, nil
+func createPDF() {
+	fmt.Println("Create PDF.")
+	latex.CreatePDF()
 }
 
-func viewHandler(w http.ResponseWriter, r *http.Request) {
-    title := r.URL.Path[len("/view/"):]
-    p, _ := loadPage(title)
-    renderTemplate(w, "view", p)
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Handle upload.")
+	fmt.Fprintf(w, fmt.Sprintf("%#v\n", upload()))
 }
 
-func saveHandler(w http.ResponseWriter, r *http.Request) {
-	latex.SaveFile(page)
-	fmt.Println("Saved file.")
+func downloadHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Handle download.")
+	download()
 }
 
-func loadHandler(w http.ResponseWriter, r *http.Request) {
-	p := latex.LoadFile()
-	fmt.Println("Loaded file.")
-	fmt.Fprintf(w, fmt.Sprintf("%#v\n",p))
-}
-
-func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-    t, _ := template.ParseFiles(tmpl + ".html")
-    t.Execute(w, p)
-}
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, latex.WriteFile("Latex function working"))
+func createHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Handle create.")
+	createPDF()
 }
 
 func main() {
 	page = latex.Page{
-		Name: "Elmer Fudd",
-		Sections: []latex.Section{latex.Section{Title: "Hello", Body:"Hi there world."}},
-		Dimension: latex.Dimension{ 20, 20, 20, 20},
+		Name:      "Elmer Fudd",
+		Sections:  []latex.Section{latex.Section{Title: "Hello", Body: "Hi there world."}},
+		Dimension: latex.Dimension{20, 20, 20, 20},
 	}
-	http.HandleFunc("/save/", saveHandler)
-	http.HandleFunc("/load/", loadHandler)
-	http.HandleFunc("/view/", viewHandler)
-	http.HandleFunc("/", handler)
+
+	http.HandleFunc("/create/", createHandler)
+	http.HandleFunc("/upload/", uploadHandler)
+	http.HandleFunc("/download/", downloadHandler)
 	http.ListenAndServe(":80", nil)
 }
