@@ -79,7 +79,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	viewPDF()
-	cmd := exec.Command("ls")
+	cmd := exec.Command("tree")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
@@ -87,7 +87,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	fmt.Println(out.String())
-	fmt.Fprint(w, "<!DOCTYPE html><html><body><p>Hello</p><img src=\"tmp/doc.png\" width=\"100%\" height=\"100%\"/></body></html>")
+	fmt.Fprint(w, "<!DOCTYPE html><html><body><p>Hello</p><img src=\"/tmp/doc.png\" width=\"100%\" height=\"100%\"/></body></html>")
 }
 
 func main() {
@@ -101,8 +101,9 @@ func main() {
 	http.HandleFunc("/upload/", uploadHandler)
 	http.HandleFunc("/download/", downloadHandler)
 	http.HandleFunc("/view/", viewHandler)
-	http.HandleFunc("/tmp/", func(w http.ResponseWriter, r *http.Request) {
+/**	http.HandleFunc("/tmp/", func(w http.ResponseWriter, r *http.Request) {
        		http.ServeFile(w, r, r.URL.Path[1:])
 	})
+*/	http.Handle("/tmp/", http.StripPrefix("/tmp/", http.FileServer(http.Dir("tmp"))))
 	http.ListenAndServe(":80", nil)
 }
