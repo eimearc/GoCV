@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"bytes"
+	"os/exec"
 	"encoding/gob"
 	"log"
 
@@ -56,6 +58,10 @@ func createPDF() {
 	latex.CreatePDF()
 }
 
+func viewPDF() {
+	fmt.Println("View PDF.")
+}
+
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Handle upload.")
 	fmt.Fprintf(w, fmt.Sprintf("%#v\n", upload()))
@@ -71,15 +77,32 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	createPDF()
 }
 
+func viewHandler(w http.ResponseWriter, r *http.Request) {
+	viewPDF()
+	cmd := exec.Command("ls")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(out.String())
+	fmt.Fprint(w, "<!DOCTYPE html><html><body><p>Hello</p><img src=\"tmp/doc.png\" width=\"100%\" height=\"100%\"/></body></html>")
+}
+
 func main() {
 	page = latex.Page{
 		Name:      "Elmer Fudd",
-		Sections:  []latex.Section{latex.Section{Title: "Hello", Body: "Hi there world."}},
+		Sections:  []latex.Section{latex.Section{Title: "Education", Body: "Acme University"}},
 		Dimension: latex.Dimension{20, 20, 20, 20},
 	}
 
 	http.HandleFunc("/create/", createHandler)
 	http.HandleFunc("/upload/", uploadHandler)
 	http.HandleFunc("/download/", downloadHandler)
+	http.HandleFunc("/view/", viewHandler)
+	http.HandleFunc("/tmp/", func(w http.ResponseWriter, r *http.Request) {
+       		http.ServeFile(w, r, r.URL.Path[1:])
+	})
 	http.ListenAndServe(":80", nil)
 }
