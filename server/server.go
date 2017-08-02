@@ -1,21 +1,19 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"bytes"
-	"os/exec"
-	"encoding/gob"
-	"log"
 
 	"github.com/eimearc/latex"
 )
 
-var page latex.Page
+var page latex.CV
 var filePath string = "/root/go/src/github.com/eimearc/latex.txt"
 
-func upload() latex.Page {
+func upload() latex.CV {
 	fmt.Println("Upload file.")
 
 	f, err := os.Open(filePath)
@@ -24,7 +22,7 @@ func upload() latex.Page {
 		log.Fatal("Error opening file", filePath, err)
 	}
 
-	var result latex.Page
+	var result latex.CV
 	enc := gob.NewDecoder(f)
 	err = enc.Decode(&result)
 	if err != nil {
@@ -79,21 +77,24 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	viewPDF()
-	cmd := exec.Command("tree")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(out.String())
 	fmt.Fprint(w, "<!DOCTYPE html><html><body><p>Hello</p><img src=\"/tmp/doc.png\" width=\"100%\" height=\"100%\"/></body></html>")
 }
 
+func gobRegister() {
+	gob.Register(latex.Contact{})
+	gob.Register(latex.Education{})
+	gob.Register(latex.Experience{})
+	gob.Register(latex.PersonalDetail{})
+	gob.Register(latex.Skill{})
+}
+
 func main() {
-	page = latex.Page{
-		Name:      "Elmer Fudd",
-		Sections:  []latex.Section{latex.Section{Title: "Education", Body: "Acme University"}},
+	gobRegister()
+
+	page = latex.CV{
+		Sections:  []latex.Section{
+			latex.PersonalDetail{"Elmer Fudd"},
+			latex.Education{"Acme University"}},
 		Dimension: latex.Dimension{20, 20, 20, 20},
 	}
 
@@ -101,9 +102,6 @@ func main() {
 	http.HandleFunc("/upload/", uploadHandler)
 	http.HandleFunc("/download/", downloadHandler)
 	http.HandleFunc("/view/", viewHandler)
-/**	http.HandleFunc("/tmp/", func(w http.ResponseWriter, r *http.Request) {
-       		http.ServeFile(w, r, r.URL.Path[1:])
-	})
-*/	http.Handle("/tmp/", http.StripPrefix("/tmp/", http.FileServer(http.Dir("tmp"))))
+	http.Handle("/tmp/", http.StripPrefix("/tmp/", http.FileServer(http.Dir("tmp"))))
 	http.ListenAndServe(":80", nil)
 }

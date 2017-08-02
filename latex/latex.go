@@ -21,9 +21,9 @@ type Page struct {
 	Dimension Dimension
 }
 
-type Section struct {
-	Title string
-	Body string
+type CV struct {
+	Dimension Dimension
+	Sections []Section
 }
 
 type Dimension struct {
@@ -32,4 +32,14 @@ type Dimension struct {
 
 func CreatePDF() {
 	fmt.Println("Create PDF.")
+	createLatex()
+	compileLatex()
+}
+
+func createLatex() {
+	fmt.Println("Create Latex.")
+}
+
+func compileLatex() {
+	fmt.Println("Compile Latex.")
 }
