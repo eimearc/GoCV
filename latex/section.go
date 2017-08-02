@@ -1,13 +1,12 @@
 package latex
 
-/**
 import (
 	"fmt"
 )
-*/
 
 type Section interface {
 	GetName() string
+	GetLatex() string
 }
 
 type Contact struct {
@@ -48,4 +47,14 @@ func (p PersonalDetail) GetName() string {
 
 func (s Skill) GetName() string {
 	return s.Name
+}
+
+func (p PersonalDetail) GetLatex() string {
+	name := p.Name
+	return fmt.Sprintf("\\centerline{\\Huge{%s}}", name)
+}
+
+func (e Education) GetLatex() string {
+	name := e.Name
+	return fmt.Sprintf("\\centerline{\\Huge{%s}}", name)
 }

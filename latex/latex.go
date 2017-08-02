@@ -1,29 +1,31 @@
 package latex
 
-import(
+import (
 	"fmt"
 )
 
 // Page
-	// Name
-	// Section[]
-		// Title
-		// Body
-	// Dimensions
-		// Left
-		// Right
-		// Top
-		// Bottom
+// Name
+// Section[]
+// Title
+// Body
+// Dimensions
+// Left
+// Right
+// Top
+// Bottom
+
+const filePath string = "tmp/"
 
 type Page struct {
-	Name string
-	Sections []Section
+	Name      string
+	Sections  []Section
 	Dimension Dimension
 }
 
 type CV struct {
 	Dimension Dimension
-	Sections []Section
+	Sections  []Section
 }
 
 type Dimension struct {
@@ -31,15 +33,25 @@ type Dimension struct {
 }
 
 func CreatePDF() {
+	cv := CV{
+		Dimension: Dimension{20, 20, 20, 20},
+		Sections: []Section{
+			PersonalDetail{"Bugs Bunny"},
+			Education{"Acme University"},
+		},
+	}
+
 	fmt.Println("Create PDF.")
-	createLatex()
-	compileLatex()
+	cv.createLatex()
+	cv.compileLatex()
 }
 
-func createLatex() {
+func (cv CV) createLatex() {
 	fmt.Println("Create Latex.")
+	// Write to file tmp/tmp.tex
 }
 
-func compileLatex() {
+func (cv CV) compileLatex() {
 	fmt.Println("Compile Latex.")
+	// write to file tmp/tmp.pdf
 }
