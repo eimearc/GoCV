@@ -54,7 +54,12 @@ func (cv CV) createLatex() {
 	// Write to file tmp/tmp.tex
 	fileName := filePath + "tmp.tex"
 	code := "\\documentclass[a4paper,12pt]{article}\n" +
-		"\\usepackage{tabu}\n" + 
+		"\\usepackage{array}\n" +
+		"\\usepackage{geometry}\n" +
+		"\\usepackage{lipsum}\n" +
+		"\\usepackage{multirow}\n" +
+		"\\usepackage{tabu}\n" +
+		"\\usepackage[table]{xcolor}\n" +
 		"\\begin{document}\n" +
 		"Hello world.\n"
 	for _, s := range cv.Sections {
