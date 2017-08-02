@@ -55,8 +55,11 @@ func (cv CV) createLatex() {
 	fileName := filePath + "tmp.tex"
 	code := "\\documentclass[a4paper,12pt]{article}\n" +
 		"\\begin{document}\n" +
-		"Hello world.\n" +
-		"\\end{document}\n"
+		"Hello world.\n"
+	for _, s := range cv.Sections {
+		code += s.GetLatex() + "\n"
+	}
+	code += "\\end{document}\n"
 	f, err := os.Create(fileName)
 	defer f.Close()
 	if err != nil {

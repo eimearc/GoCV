@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/gob"
+	"os/exec"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/eimearc/latex"
 )
@@ -54,10 +56,23 @@ func download() {
 func createPDF() {
 	fmt.Println("Create PDF.")
 	latex.CreatePDF()
+	convertToPNG("tmp/tmp.pdf")
 }
 
 func viewPDF() {
 	fmt.Println("View PDF.")
+}
+
+func convertToPNG(fileName string) {
+	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+		log.Fatal("File", fileName, "does not exist\n", err)
+	}
+	pngName := strings.TrimSuffix(fileName, ".pdf") + ".png"
+	cmd := exec.Command("convert", fileName, pngName)
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal("Cannot convert", fileName, "to", pngName, "\n", err)
+	}
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +92,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	viewPDF()
-	fmt.Fprint(w, "<!DOCTYPE html><html><body><p>Hello</p><img src=\"/tmp/doc.png\" width=\"100%\" height=\"100%\"/></body></html>")
+	fmt.Fprint(w, "<!DOCTYPE html><html><body><p>Hello</p><img src=\"/tmp/tmp.png\" width=\"100%\" height=\"100%\"/></body></html>")
 }
 
 func gobRegister() {
