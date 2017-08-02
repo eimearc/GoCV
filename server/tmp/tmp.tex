@@ -1,5 +1,6 @@
 \documentclass[a4paper,12pt]{article}
 \usepackage{array}
+\usepackage{color}
 \usepackage{geometry}
 \usepackage{lipsum}
 \usepackage{multirow}
@@ -7,6 +8,8 @@
 \usepackage[table]{xcolor}
 \begin{document}
 Hello world.
-\centerline{\Huge{Bugs Bunny}}
-\centerline{\Huge{Acme University}}
+\begin{tabu} to \textwidth {X[1,l]X[1,l]}
+\rowcolor{gray} \cellcolor{gray} \color{black} Hello & \cellcolor{gray} \color{black} World \\
+\rowcolor{white} \cellcolor{white} \color{black} Golang & \cellcolor{white} \color{black} Gopher \\
+\end{tabu}
 \end{document}

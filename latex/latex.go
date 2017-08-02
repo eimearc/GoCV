@@ -55,6 +55,7 @@ func (cv CV) createLatex() {
 	fileName := filePath + "tmp.tex"
 	code := "\\documentclass[a4paper,12pt]{article}\n" +
 		"\\usepackage{array}\n" +
+		"\\usepackage{color}\n" +
 		"\\usepackage{geometry}\n" +
 		"\\usepackage{lipsum}\n" +
 		"\\usepackage{multirow}\n" +
@@ -62,9 +63,47 @@ func (cv CV) createLatex() {
 		"\\usepackage[table]{xcolor}\n" +
 		"\\begin{document}\n" +
 		"Hello world.\n"
-	for _, s := range cv.Sections {
-		code += s.GetLatex() + "\n"
+	/*
+		for _, s := range cv.Sections {
+			code += s.GetLatex() + "\n"
+		}
+	*/
+	t := Table{
+		[]Row{
+			Row{
+				[]Cell{
+					Cell{
+						[]Word{
+							Word{
+								"Hello",
+								Black}},
+						Gray},
+					Cell{
+						[]Word{
+							Word{
+								"World",
+								Black}},
+						Gray}},
+				Gray},
+			Row{
+				[]Cell{
+					Cell{
+						[]Word{
+							Word{
+								"Golang",
+								Black}},
+						White},
+					Cell{
+						[]Word{
+							Word{
+								"Gopher",
+								Black}},
+						White}},
+				White},
+		}
 	}
+	fmt.Println(t.getLatex())
+	code += t.getLatex()
 	code += "\\end{document}\n"
 	f, err := os.Create(fileName)
 	defer f.Close()
