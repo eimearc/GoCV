@@ -2,6 +2,8 @@ package latex
 
 import (
 	"fmt"
+	"log"
+	"os"
 )
 
 // Page
@@ -49,6 +51,20 @@ func CreatePDF() {
 func (cv CV) createLatex() {
 	fmt.Println("Create Latex.")
 	// Write to file tmp/tmp.tex
+	fileName := filePath + "tmp.tex"
+	code := "\\documentclass[a4paper,12pt]{article}\n" +
+		"\\begin{document}\n" +
+		"Hello world.\n" +
+		"\\end{document}\n"
+	f, err := os.Create(fileName)
+	defer f.Close()
+	if err != nil {
+		log.Fatal("Error creating Latex.\n", err)
+	}
+	_, err = f.WriteString(code)
+	if err != nil {
+		log.Fatal("Error writing Latex.\n", err)
+	}
 }
 
 func (cv CV) compileLatex() {
