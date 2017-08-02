@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 )
 
 // Page
@@ -17,7 +18,7 @@ import (
 // Top
 // Bottom
 
-const filePath string = "tmp/"
+const filePath string = "/root/go/src/github.com/eimearc/server/tmp/"
 
 type Page struct {
 	Name      string
@@ -70,4 +71,10 @@ func (cv CV) createLatex() {
 func (cv CV) compileLatex() {
 	fmt.Println("Compile Latex.")
 	// write to file tmp/tmp.pdf
+	fileName := filePath + "tmp.tex"
+	cmd := exec.Command("pdflatex", "-output-directory", "tmp", fileName)
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal("Error compiling Latex\n", err)
+	}
 }
